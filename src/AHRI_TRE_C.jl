@@ -1,9 +1,11 @@
 module AHRI_TRE_C
 
 export load_library!, version, sha256_file_hex, verify_sha256_file, path_to_file_uri, file_uri_to_path, is_ncname, to_ncname
-export parse_flavour, map_sql_type_to_tre, extract_table_from_sql, parse_in_list_values_json
-export parse_check_constraint_values_json, map_redcap_value_type, parse_redcap_choices_json
-export strip_html, infer_label_from_field_name, get_redcap_choices_for_field_json
+export parse_flavour, map_sql_type_to_tre, extract_table_from_sql, parse_in_list_values
+export parse_check_constraint_values, map_value_type, parse_redcap_choices
+export strip_html, infer_label_from_field_name, get_redcap_choices_for_field
+export parse_in_list_values_json, parse_check_constraint_values_json, map_redcap_value_type
+export parse_redcap_choices_json, get_redcap_choices_for_field_json
 
 const _lib_ref = Ref{String}("")
 
@@ -217,6 +219,10 @@ function get_redcap_choices_for_field_json(field_type::AbstractString, choices::
     end
 end
 
+function get_redcap_choices_for_field(field_type::AbstractString, choices::Union{Nothing, AbstractString}=nothing)::String
+    return get_redcap_choices_for_field_json(field_type, choices)
+end
+
 function parse_flavour(flavour::AbstractString)::Int
     out_flavour = Ref{Cint}(0)
     code = ccall((:parse_flavour, _lib()), Cint, (Cstring, Ref{Cint}), flavour, out_flavour)
@@ -261,6 +267,10 @@ function parse_in_list_values_json(values_str::AbstractString)::String
     end
 end
 
+function parse_in_list_values(values_str::AbstractString)::String
+    return parse_in_list_values_json(values_str)
+end
+
 function parse_check_constraint_values_json(constraint_def::AbstractString, column_name::AbstractString)::String
     out_ptr = Ref{Ptr{UInt8}}(C_NULL)
     code = ccall((:parse_check_constraint_values_json, _lib()), Cint, (Cstring, Cstring, Ref{Ptr{UInt8}}), constraint_def, column_name, out_ptr)
@@ -272,6 +282,10 @@ function parse_check_constraint_values_json(constraint_def::AbstractString, colu
     finally
         ccall((:free_ptr, _lib()), Cvoid, (Ptr{Cvoid},), out_ptr[])
     end
+end
+
+function parse_check_constraint_values(constraint_def::AbstractString, column_name::AbstractString)::String
+    return parse_check_constraint_values_json(constraint_def, column_name)
 end
 
 function map_redcap_value_type(field_type::AbstractString, validation::Union{Nothing, AbstractString}=nothing)
@@ -298,6 +312,10 @@ function map_redcap_value_type(field_type::AbstractString, validation::Union{Not
     return Int(out_type[]), fmt
 end
 
+function map_value_type(field_type::AbstractString, validation::Union{Nothing, AbstractString}=nothing)
+    return map_redcap_value_type(field_type, validation)
+end
+
 function parse_redcap_choices_json(choices::AbstractString)::String
     out_ptr = Ref{Ptr{UInt8}}(C_NULL)
     code = ccall((:parse_redcap_choices_json, _lib()), Cint, (Cstring, Ref{Ptr{UInt8}}), choices, out_ptr)
@@ -309,6 +327,10 @@ function parse_redcap_choices_json(choices::AbstractString)::String
     finally
         ccall((:free_ptr, _lib()), Cvoid, (Ptr{Cvoid},), out_ptr[])
     end
+end
+
+function parse_redcap_choices(choices::AbstractString)::String
+    return parse_redcap_choices_json(choices)
 end
 
 end
