@@ -83,31 +83,31 @@ function _lib()
 end
 
 function _last_error()
-    ptr = ccall((:ahri_tre_last_error, _lib()), Ptr{UInt8}, ())
+    ptr = ccall((:last_error, _lib()), Ptr{UInt8}, ())
     return ptr == C_NULL ? "Unknown AHRI_TRE C error" : unsafe_string(ptr)
 end
 
 function version()::String
-    ptr = ccall((:ahri_tre_version, _lib()), Ptr{UInt8}, ())
+    ptr = ccall((:version, _lib()), Ptr{UInt8}, ())
     return unsafe_string(ptr)
 end
 
 function sha256_file_hex(path::AbstractString)::String
     out_ptr = Ref{Ptr{UInt8}}(C_NULL)
-    code = ccall((:ahri_tre_sha256_file_hex, _lib()), Cint, (Cstring, Ref{Ptr{UInt8}}), path, out_ptr)
+    code = ccall((:sha256_file_hex, _lib()), Cint, (Cstring, Ref{Ptr{UInt8}}), path, out_ptr)
     if code != 0
         error("AHRI_TRE C error $(code): $(_last_error())")
     end
     try
         return unsafe_string(out_ptr[])
     finally
-        ccall((:ahri_tre_free, _lib()), Cvoid, (Ptr{Cvoid},), out_ptr[])
+        ccall((:free_ptr, _lib()), Cvoid, (Ptr{Cvoid},), out_ptr[])
     end
 end
 
 function verify_sha256_file(path::AbstractString, expected_hex::AbstractString)::Bool
     out_match = Ref{Cint}(0)
-    code = ccall((:ahri_tre_verify_sha256_file, _lib()), Cint, (Cstring, Cstring, Ref{Cint}), path, expected_hex, out_match)
+    code = ccall((:verify_sha256_file, _lib()), Cint, (Cstring, Cstring, Ref{Cint}), path, expected_hex, out_match)
     if code != 0
         error("AHRI_TRE C error $(code): $(_last_error())")
     end
@@ -116,33 +116,33 @@ end
 
 function path_to_file_uri(path::AbstractString)::String
     out_ptr = Ref{Ptr{UInt8}}(C_NULL)
-    code = ccall((:ahri_tre_path_to_file_uri, _lib()), Cint, (Cstring, Ref{Ptr{UInt8}}), path, out_ptr)
+    code = ccall((:path_to_file_uri, _lib()), Cint, (Cstring, Ref{Ptr{UInt8}}), path, out_ptr)
     if code != 0
         error("AHRI_TRE C error $(code): $(_last_error())")
     end
     try
         return unsafe_string(out_ptr[])
     finally
-        ccall((:ahri_tre_free, _lib()), Cvoid, (Ptr{Cvoid},), out_ptr[])
+        ccall((:free_ptr, _lib()), Cvoid, (Ptr{Cvoid},), out_ptr[])
     end
 end
 
 function file_uri_to_path(uri::AbstractString)::String
     out_ptr = Ref{Ptr{UInt8}}(C_NULL)
-    code = ccall((:ahri_tre_file_uri_to_path, _lib()), Cint, (Cstring, Ref{Ptr{UInt8}}), uri, out_ptr)
+    code = ccall((:file_uri_to_path, _lib()), Cint, (Cstring, Ref{Ptr{UInt8}}), uri, out_ptr)
     if code != 0
         error("AHRI_TRE C error $(code): $(_last_error())")
     end
     try
         return unsafe_string(out_ptr[])
     finally
-        ccall((:ahri_tre_free, _lib()), Cvoid, (Ptr{Cvoid},), out_ptr[])
+        ccall((:free_ptr, _lib()), Cvoid, (Ptr{Cvoid},), out_ptr[])
     end
 end
 
 function is_ncname(value::AbstractString; strict::Bool=false)::Bool
     out_valid = Ref{Cint}(0)
-    code = ccall((:ahri_tre_is_ncname, _lib()), Cint, (Cstring, Cint, Ref{Cint}), value, strict ? 1 : 0, out_valid)
+    code = ccall((:is_ncname, _lib()), Cint, (Cstring, Cint, Ref{Cint}), value, strict ? 1 : 0, out_valid)
     if code != 0
         error("AHRI_TRE C error $(code): $(_last_error())")
     end
@@ -152,7 +152,7 @@ end
 function to_ncname(value::AbstractString; replacement::AbstractString="_", prefix::AbstractString="_", avoid_reserved::Bool=true, strict::Bool=false)::String
     out_ptr = Ref{Ptr{UInt8}}(C_NULL)
     code = ccall(
-        (:ahri_tre_to_ncname, _lib()),
+        (:to_ncname, _lib()),
         Cint,
         (Cstring, Cstring, Cstring, Cint, Cint, Ref{Ptr{UInt8}}),
         value,
@@ -168,43 +168,43 @@ function to_ncname(value::AbstractString; replacement::AbstractString="_", prefi
     try
         return unsafe_string(out_ptr[])
     finally
-        ccall((:ahri_tre_free, _lib()), Cvoid, (Ptr{Cvoid},), out_ptr[])
+        ccall((:free_ptr, _lib()), Cvoid, (Ptr{Cvoid},), out_ptr[])
     end
 end
 
 function strip_html(text::AbstractString)::String
     out_ptr = Ref{Ptr{UInt8}}(C_NULL)
-    code = ccall((:ahri_tre_strip_html, _lib()), Cint, (Cstring, Ref{Ptr{UInt8}}), text, out_ptr)
+    code = ccall((:strip_html, _lib()), Cint, (Cstring, Ref{Ptr{UInt8}}), text, out_ptr)
     if code != 0
         error("AHRI_TRE C error $(code): $(_last_error())")
     end
     try
         return unsafe_string(out_ptr[])
     finally
-        ccall((:ahri_tre_free, _lib()), Cvoid, (Ptr{Cvoid},), out_ptr[])
+        ccall((:free_ptr, _lib()), Cvoid, (Ptr{Cvoid},), out_ptr[])
     end
 end
 
 function infer_label_from_field_name(field_name::AbstractString)::String
     out_ptr = Ref{Ptr{UInt8}}(C_NULL)
-    code = ccall((:ahri_tre_infer_label_from_field_name, _lib()), Cint, (Cstring, Ref{Ptr{UInt8}}), field_name, out_ptr)
+    code = ccall((:infer_label_from_field_name, _lib()), Cint, (Cstring, Ref{Ptr{UInt8}}), field_name, out_ptr)
     if code != 0
         error("AHRI_TRE C error $(code): $(_last_error())")
     end
     try
         return unsafe_string(out_ptr[])
     finally
-        ccall((:ahri_tre_free, _lib()), Cvoid, (Ptr{Cvoid},), out_ptr[])
+        ccall((:free_ptr, _lib()), Cvoid, (Ptr{Cvoid},), out_ptr[])
     end
 end
 
 function get_redcap_choices_for_field_json(field_type::AbstractString, choices::Union{Nothing, AbstractString}=nothing)::String
     out_ptr = Ref{Ptr{UInt8}}(C_NULL)
     code = if choices === nothing
-        ccall((:ahri_tre_get_redcap_choices_for_field_json, _lib()), Cint,
+        ccall((:get_redcap_choices_for_field_json, _lib()), Cint,
             (Cstring, Cstring, Ref{Ptr{UInt8}}), field_type, C_NULL, out_ptr)
     else
-        ccall((:ahri_tre_get_redcap_choices_for_field_json, _lib()), Cint,
+        ccall((:get_redcap_choices_for_field_json, _lib()), Cint,
             (Cstring, Cstring, Ref{Ptr{UInt8}}), field_type, choices, out_ptr)
     end
     if code != 0
@@ -213,13 +213,13 @@ function get_redcap_choices_for_field_json(field_type::AbstractString, choices::
     try
         return out_ptr[] == C_NULL ? "[]" : unsafe_string(out_ptr[])
     finally
-        ccall((:ahri_tre_free, _lib()), Cvoid, (Ptr{Cvoid},), out_ptr[])
+        ccall((:free_ptr, _lib()), Cvoid, (Ptr{Cvoid},), out_ptr[])
     end
 end
 
 function parse_flavour(flavour::AbstractString)::Int
     out_flavour = Ref{Cint}(0)
-    code = ccall((:ahri_tre_parse_flavour, _lib()), Cint, (Cstring, Ref{Cint}), flavour, out_flavour)
+    code = ccall((:parse_flavour, _lib()), Cint, (Cstring, Ref{Cint}), flavour, out_flavour)
     if code != 0
         error("AHRI_TRE C error $(code): $(_last_error())")
     end
@@ -228,7 +228,7 @@ end
 
 function map_sql_type_to_tre(sql_type::AbstractString)::Int
     out_type = Ref{Cint}(0)
-    code = ccall((:ahri_tre_map_sql_type_to_tre, _lib()), Cint, (Cstring, Ref{Cint}), sql_type, out_type)
+    code = ccall((:map_sql_type_to_tre, _lib()), Cint, (Cstring, Ref{Cint}), sql_type, out_type)
     if code != 0
         error("AHRI_TRE C error $(code): $(_last_error())")
     end
@@ -237,40 +237,40 @@ end
 
 function extract_table_from_sql(sql::AbstractString)::String
     out_ptr = Ref{Ptr{UInt8}}(C_NULL)
-    code = ccall((:ahri_tre_extract_table_from_sql, _lib()), Cint, (Cstring, Ref{Ptr{UInt8}}), sql, out_ptr)
+    code = ccall((:extract_table_from_sql, _lib()), Cint, (Cstring, Ref{Ptr{UInt8}}), sql, out_ptr)
     if code != 0
         error("AHRI_TRE C error $(code): $(_last_error())")
     end
     try
         return out_ptr[] == C_NULL ? "" : unsafe_string(out_ptr[])
     finally
-        ccall((:ahri_tre_free, _lib()), Cvoid, (Ptr{Cvoid},), out_ptr[])
+        ccall((:free_ptr, _lib()), Cvoid, (Ptr{Cvoid},), out_ptr[])
     end
 end
 
 function parse_in_list_values_json(values_str::AbstractString)::String
     out_ptr = Ref{Ptr{UInt8}}(C_NULL)
-    code = ccall((:ahri_tre_parse_in_list_values_json, _lib()), Cint, (Cstring, Ref{Ptr{UInt8}}), values_str, out_ptr)
+    code = ccall((:parse_in_list_values_json, _lib()), Cint, (Cstring, Ref{Ptr{UInt8}}), values_str, out_ptr)
     if code != 0
         error("AHRI_TRE C error $(code): $(_last_error())")
     end
     try
         return out_ptr[] == C_NULL ? "[]" : unsafe_string(out_ptr[])
     finally
-        ccall((:ahri_tre_free, _lib()), Cvoid, (Ptr{Cvoid},), out_ptr[])
+        ccall((:free_ptr, _lib()), Cvoid, (Ptr{Cvoid},), out_ptr[])
     end
 end
 
 function parse_check_constraint_values_json(constraint_def::AbstractString, column_name::AbstractString)::String
     out_ptr = Ref{Ptr{UInt8}}(C_NULL)
-    code = ccall((:ahri_tre_parse_check_constraint_values_json, _lib()), Cint, (Cstring, Cstring, Ref{Ptr{UInt8}}), constraint_def, column_name, out_ptr)
+    code = ccall((:parse_check_constraint_values_json, _lib()), Cint, (Cstring, Cstring, Ref{Ptr{UInt8}}), constraint_def, column_name, out_ptr)
     if code != 0
         error("AHRI_TRE C error $(code): $(_last_error())")
     end
     try
         return out_ptr[] == C_NULL ? "[]" : unsafe_string(out_ptr[])
     finally
-        ccall((:ahri_tre_free, _lib()), Cvoid, (Ptr{Cvoid},), out_ptr[])
+        ccall((:free_ptr, _lib()), Cvoid, (Ptr{Cvoid},), out_ptr[])
     end
 end
 
@@ -278,9 +278,9 @@ function map_redcap_value_type(field_type::AbstractString, validation::Union{Not
     out_type = Ref{Cint}(0)
     out_fmt = Ref{Ptr{UInt8}}(C_NULL)
     code = if validation === nothing
-        ccall((:ahri_tre_map_redcap_value_type, _lib()), Cint, (Cstring, Cstring, Ref{Cint}, Ref{Ptr{UInt8}}), field_type, C_NULL, out_type, out_fmt)
+        ccall((:map_value_type, _lib()), Cint, (Cstring, Cstring, Ref{Cint}, Ref{Ptr{UInt8}}), field_type, C_NULL, out_type, out_fmt)
     else
-        ccall((:ahri_tre_map_redcap_value_type, _lib()), Cint, (Cstring, Cstring, Ref{Cint}, Ref{Ptr{UInt8}}), field_type, validation, out_type, out_fmt)
+        ccall((:map_value_type, _lib()), Cint, (Cstring, Cstring, Ref{Cint}, Ref{Ptr{UInt8}}), field_type, validation, out_type, out_fmt)
     end
     if code != 0
         error("AHRI_TRE C error $(code): $(_last_error())")
@@ -292,7 +292,7 @@ function map_redcap_value_type(field_type::AbstractString, validation::Union{Not
         end
     finally
         if out_fmt[] != C_NULL
-            ccall((:ahri_tre_free, _lib()), Cvoid, (Ptr{Cvoid},), out_fmt[])
+            ccall((:free_ptr, _lib()), Cvoid, (Ptr{Cvoid},), out_fmt[])
         end
     end
     return Int(out_type[]), fmt
@@ -300,14 +300,14 @@ end
 
 function parse_redcap_choices_json(choices::AbstractString)::String
     out_ptr = Ref{Ptr{UInt8}}(C_NULL)
-    code = ccall((:ahri_tre_parse_redcap_choices_json, _lib()), Cint, (Cstring, Ref{Ptr{UInt8}}), choices, out_ptr)
+    code = ccall((:parse_redcap_choices_json, _lib()), Cint, (Cstring, Ref{Ptr{UInt8}}), choices, out_ptr)
     if code != 0
         error("AHRI_TRE C error $(code): $(_last_error())")
     end
     try
         return out_ptr[] == C_NULL ? "[]" : unsafe_string(out_ptr[])
     finally
-        ccall((:ahri_tre_free, _lib()), Cvoid, (Ptr{Cvoid},), out_ptr[])
+        ccall((:free_ptr, _lib()), Cvoid, (Ptr{Cvoid},), out_ptr[])
     end
 end
 
