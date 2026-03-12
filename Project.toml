@@ -1,7 +1,7 @@
 name = "AHRI_TRE_C"
 uuid = "3f0e2b73-20ec-4d3b-9d5e-7a9fba2d7f1b"
 authors = ["AHRI"]
-version = "0.1.0"
+version = "0.1.1"
 
 [compat]
 julia = "1.9"
