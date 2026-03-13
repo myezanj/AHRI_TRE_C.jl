@@ -8,6 +8,12 @@ Maintainer: Njabulo Myeza (author, creator) - njabulo.myeza@ahri.org
 
 Conversion behavior should be validated against the canonical Julia source repository: `https://github.com/AHRIORG/AHRI_TRE.jl`.
 
+## C ABI symbol policy
+
+The Julia wrapper now calls Julia-style unprefixed C symbols as the primary target (for example: `version`, `last_error`, `map_value_type`).
+
+Prefixed symbols (for example: `ahri_tre_version`, `ahri_tre_last_error`) remain available in the C core as compatibility aliases and are safe for older consumers.
+
 ## Activate and use
 
 ```julia
