@@ -1,7 +1,16 @@
 name = "AHRI_TRE_C"
 uuid = "3f0e2b73-20ec-4d3b-9d5e-7a9fba2d7f1b"
-authors = ["AHRI"]
+authors = ["Njabulo Myeza <njabulo.myeza@ahri.org>"]
 version = "0.1.1"
+
+[deps]
+Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 
 [compat]
 julia = "1.9"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
