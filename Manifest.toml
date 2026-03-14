@@ -1,0 +1,15 @@
+# This file is machine-generated - editing it directly is not advised
+
+julia_version = "1.12.4"
+manifest_format = "2.0"
+project_hash = "502254a69abf952c65287bb14ce3ec2f4a5b9914"
+
+[[deps.AHRI_TRE_C]]
+deps = ["Libdl"]
+path = "."
+uuid = "3f0e2b73-20ec-4d3b-9d5e-7a9fba2d7f1b"
+version = "0.1.1"
+
+[[deps.Libdl]]
+uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
+version = "1.11.0"
