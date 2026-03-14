@@ -42,4 +42,12 @@ ENV["TRE_C_ROOT"] = raw"C:\path\to\TRE.C"
 
 Set `ENV["TRE_C_LIB"]` to override the shared library path directly.
 
+By default, library discovery now attempts to fast-forward sync local clones whose
+`origin` is `https://github.com/myezanj/AHRI_TRE.c.git` before resolving the
+shared library path. To disable this behavior:
+
+```julia
+ENV["TRE_C_SYNC_LATEST"] = "0"
+```
+
 Legacy compatibility is still supported for `ENV["AHRI_TRE_C_ROOT"]` and `ENV["AHRI_TRE_C_LIB"]`.
