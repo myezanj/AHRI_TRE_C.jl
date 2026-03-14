@@ -134,3 +134,27 @@ function parse_redcap_choices_json(choices::AbstractString)::String
     code = ccall((_c_symbol("parse_redcap_choices_json"), _lib()), Cint, (Cstring, Ref{Ptr{UInt8}}), choices, out_ptr)
     return _string_result(code, out_ptr; null_default="[]")
 end
+
+function get_redcap_choices_for_field(field_type::AbstractString, choices::Union{Nothing, AbstractString}=nothing)::String
+    return get_redcap_choices_for_field_json(field_type, choices)
+end
+
+function parse_in_list_values(values_str::AbstractString)::String
+    return parse_in_list_values_json(values_str)
+end
+
+function parse_check_constraint_values(constraint_def::AbstractString, column_name::AbstractString)::String
+    return parse_check_constraint_values_json(constraint_def, column_name)
+end
+
+function get_check_constraint_values(constraint_def::AbstractString, column_name::AbstractString)::String
+    return parse_check_constraint_values(constraint_def, column_name)
+end
+
+function map_value_type(field_type::AbstractString, validation::Union{Nothing, AbstractString}=nothing)
+    return map_redcap_value_type(field_type, validation)
+end
+
+function parse_redcap_choices(choices::AbstractString)::String
+    return parse_redcap_choices_json(choices)
+end
