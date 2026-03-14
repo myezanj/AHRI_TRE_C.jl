@@ -7,6 +7,44 @@ const _NEW_ROOT_ENV = "TRE_C_ROOT"
 const _OLD_ROOT_ENV = "AHRI_TRE_C_ROOT"
 const _NEW_LIB_ENV = "TRE_C_LIB"
 const _OLD_LIB_ENV = "AHRI_TRE_C_LIB"
+const _SYNC_LATEST_ENV = "TRE_C_SYNC_LATEST"
+const _LATEST_REMOTE_URL = "https://github.com/myezanj/AHRI_TRE.c.git"
+
+function _normalized_remote(url::AbstractString)::String
+    out = strip(String(url))
+    out = replace(out, r"\.git$" => "")
+    out = replace(out, "git@github.com:" => "https://github.com/")
+    return out
+end
+
+function _want_latest_sync()::Bool
+    val = get(ENV, _SYNC_LATEST_ENV, "1")
+    val_l = lowercase(strip(val))
+    return !(val_l in ("0", "false", "no", "off"))
+end
+
+function _repo_uses_latest_remote(repo_root::AbstractString)::Bool
+    gitdir = joinpath(repo_root, ".git")
+    if !isdir(gitdir)
+        return false
+    end
+    try
+        remote = readchomp(`git -C $(repo_root) config --get remote.origin.url`)
+        return _normalized_remote(remote) == _normalized_remote(_LATEST_REMOTE_URL)
+    catch
+        return false
+    end
+end
+
+function _sync_repo_latest!(repo_root::AbstractString)
+    try
+        run(`git -C $(repo_root) fetch origin --quiet`)
+        run(`git -C $(repo_root) pull --ff-only --quiet`)
+    catch
+        # Continue with local checkout if network/auth/ff-only sync fails.
+    end
+    return nothing
+end
 
 function _candidate_core_roots()::Vector{String}
     roots = String[]
@@ -51,6 +89,10 @@ function _default_library_path()::String
     end
 
     for repo_root in _candidate_core_roots()
+        if _want_latest_sync() && _repo_uses_latest_remote(repo_root)
+            _sync_repo_latest!(repo_root)
+        end
+
         if Sys.iswindows()
             candidates = [
                 joinpath(repo_root, "c_core", "build", "Release", "tre_c.dll"),
