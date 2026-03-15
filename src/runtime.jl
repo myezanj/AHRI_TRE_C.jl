@@ -7,8 +7,72 @@ const _NEW_ROOT_ENV = "TRE_C_ROOT"
 const _OLD_ROOT_ENV = "AHRI_TRE_C_ROOT"
 const _NEW_LIB_ENV = "TRE_C_LIB"
 const _OLD_LIB_ENV = "AHRI_TRE_C_LIB"
+const _NEW_VERSION_MIN_ENV = "TRE_C_VERSION_MIN"
+const _OLD_VERSION_MIN_ENV = "AHRI_TRE_C_VERSION_MIN"
+const _NEW_VERSION_MAX_ENV = "TRE_C_VERSION_MAX"
+const _OLD_VERSION_MAX_ENV = "AHRI_TRE_C_VERSION_MAX"
+const _DEFAULT_VERSION_MIN = "0.2.0"
+const _DEFAULT_VERSION_MAX = "0.2.x"
 const _SYNC_LATEST_ENV = "TRE_C_SYNC_LATEST"
 const _LATEST_REMOTE_URL = "https://github.com/myezanj/AHRI_TRE.c.git"
+
+function _first_env(names::Tuple{Vararg{String}})::Union{Nothing, String}
+    for name in names
+        if haskey(ENV, name)
+            value = strip(ENV[name])
+            if !isempty(value)
+                return value
+            end
+        end
+    end
+    return nothing
+end
+
+function _parse_semver_tuple(version::AbstractString)::NTuple{3, Int}
+    m = match(r"^\s*(\d+)\.(\d+)\.(\d+)", String(version))
+    if m === nothing
+        error("Invalid C core version '$(version)'. Expected semver like '0.2.0'.")
+    end
+    return (parse(Int, m.captures[1]), parse(Int, m.captures[2]), parse(Int, m.captures[3]))
+end
+
+function _version_meets_min(current::NTuple{3, Int}, min_spec::AbstractString)::Bool
+    return current >= _parse_semver_tuple(min_spec)
+end
+
+function _version_meets_max(current::NTuple{3, Int}, max_spec::AbstractString)::Bool
+    spec = lowercase(strip(String(max_spec)))
+    if occursin('x', spec) || occursin('*', spec)
+        tokens = split(spec, '.')
+        current_parts = (current[1], current[2], current[3])
+        for i in 1:min(3, length(tokens))
+            token = strip(tokens[i])
+            if token == "x" || token == "*"
+                return true
+            end
+            if isnothing(match(r"^\d+$", token)) || current_parts[i] != parse(Int, token)
+                return false
+            end
+        end
+        return true
+    end
+    return current <= _parse_semver_tuple(spec)
+end
+
+function _validate_core_version_window!()
+    min_spec = something(_first_env((_NEW_VERSION_MIN_ENV, _OLD_VERSION_MIN_ENV)), _DEFAULT_VERSION_MIN)
+    max_spec = something(_first_env((_NEW_VERSION_MAX_ENV, _OLD_VERSION_MAX_ENV)), _DEFAULT_VERSION_MAX)
+    version_ptr = ccall((_c_symbol("version"), _lib()), Ptr{UInt8}, ())
+    core_version = version_ptr == C_NULL ? "" : unsafe_string(version_ptr)
+    current = _parse_semver_tuple(core_version)
+
+    if !_version_meets_min(current, min_spec) || !_version_meets_max(current, max_spec)
+        error("AHRI_TRE C core version '$(core_version)' is outside the supported window [$(min_spec), $(max_spec)]. " *
+              "Adjust TRE_C_VERSION_MIN/TRE_C_VERSION_MAX or install a compatible core.")
+    end
+
+    return nothing
+end
 
 function _normalized_remote(url::AbstractString)::String
     out = strip(String(url))
@@ -129,6 +193,7 @@ end
 function load_library!(path::Union{Nothing, AbstractString}=nothing)
     _lib_ref[] = path === nothing ? _default_library_path() : String(path)
     _symbol_prefix_ref[] = nothing
+    _validate_core_version_window!()
     return nothing
 end
 

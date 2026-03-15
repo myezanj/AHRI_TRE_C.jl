@@ -40,7 +40,26 @@ If TRE.C (or legacy AHRI_TRE.C) is a sibling repository, set:
 ENV["TRE_C_ROOT"] = raw"C:\path\to\TRE.C"
 ```
 
+Legacy compatibility is still supported for `ENV["AHRI_TRE_C_ROOT"]`.
+
 Set `ENV["TRE_C_LIB"]` to override the shared library path directly.
+
+Legacy compatibility is still supported for `ENV["AHRI_TRE_C_LIB"]`.
+
+## Shared C version window policy
+
+This wrapper enforces a shared C-core compatibility window at load time so
+wrapper releases can remain independent while targeting the same ABI lane.
+
+Defaults:
+
+- `ENV["TRE_C_VERSION_MIN"] = "0.2.0"`
+- `ENV["TRE_C_VERSION_MAX"] = "0.2.x"`
+
+Legacy compatibility aliases:
+
+- `ENV["AHRI_TRE_C_VERSION_MIN"]`
+- `ENV["AHRI_TRE_C_VERSION_MAX"]`
 
 By default, library discovery now attempts to fast-forward sync local clones whose
 `origin` is `https://github.com/myezanj/AHRI_TRE.c.git` before resolving the
@@ -50,4 +69,4 @@ shared library path. To disable this behavior:
 ENV["TRE_C_SYNC_LATEST"] = "0"
 ```
 
-Legacy compatibility is still supported for `ENV["AHRI_TRE_C_ROOT"]` and `ENV["AHRI_TRE_C_LIB"]`.
+Legacy compatibility is still supported for AHRI-prefixed env vars.
